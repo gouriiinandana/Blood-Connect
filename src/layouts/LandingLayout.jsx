@@ -26,11 +26,14 @@ const LandingLayout = () => {
                 </div>
 
                 <div className="flex items-center space-x-3">
+                    <Link to="/login" className="text-slate-500 font-medium hover:text-primary transition-colors text-sm px-3 border-r border-slate-100 hidden sm:block">
+                        Donor Login
+                    </Link>
                     <Link to="/hospital/login">
-                        <Button variant="outline" className="hidden sm:block">Hospital Login</Button>
+                        <Button variant="outline" className="hidden sm:block">Hospital Portal</Button>
                     </Link>
                     <Link to="/register">
-                        <Button>Register as Donor</Button>
+                        <Button>Join Network</Button>
                     </Link>
                 </div>
             </nav>

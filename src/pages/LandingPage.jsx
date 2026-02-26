@@ -158,15 +158,20 @@ const LandingPage = () => {
                     <h2 className="text-4xl sm:text-7xl font-black text-slate-800 italic tracking-tight">Ready to make an impact?</h2>
                     <p className="text-xl text-slate-500 font-medium italic">Join the global network of healthcare heroes.</p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                    <Link to="/register" className="w-full sm:w-auto">
-                        <Button className="w-full h-18 px-14 text-2xl shadow-2xl shadow-primary/30 pulse-red italic font-black">Join the Donor Network</Button>
-                    </Link>
-                    <Link to="/hospital/login" className="w-full sm:w-auto">
-                        <Button variant="outline" className="w-full h-18 px-14 text-2xl items-center flex border-2 italic font-black">
-                            Hospital Integration <ArrowRight className="ml-3" size={24} />
-                        </Button>
-                    </Link>
+                <div className="flex flex-col items-center justify-center space-y-6">
+                    <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        <Link to="/register" className="w-full sm:w-auto">
+                            <Button className="w-full h-18 px-14 text-2xl shadow-2xl shadow-primary/30 pulse-red italic font-black">Join the Donor Network</Button>
+                        </Link>
+                        <Link to="/hospital/login" className="w-full sm:w-auto">
+                            <Button variant="outline" className="w-full h-18 px-14 text-2xl items-center flex border-2 italic font-black">
+                                Hospital Integration <ArrowRight className="ml-3" size={24} />
+                            </Button>
+                        </Link>
+                    </div>
+                    <p className="text-slate-400 font-bold text-sm italic uppercase tracking-widest">
+                        Already a donor? <Link to="/login" className="text-primary hover:underline">Log in to your dashboard</Link>
+                    </p>
                 </div>
             </section>
         </div>
