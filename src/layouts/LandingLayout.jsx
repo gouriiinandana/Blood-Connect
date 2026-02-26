@@ -55,8 +55,8 @@ const LandingLayout = () => {
                         <ul className="space-y-4 text-slate-400 text-sm">
                             <li><Link to="/hospital/login" className="hover:text-white transition-colors">Hospital Login</Link></li>
                             <li><Link to="/donor" className="hover:text-white transition-colors">Donor Portal</Link></li>
-                            <li><a href="#" className="hover:text-white transition-colors">AI Logistics</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Real-time Map</a></li>
+                            <li><Link to="/" className="hover:text-white transition-colors">AI Logistics</Link></li>
+                            <li><Link to="/" className="hover:text-white transition-colors">Real-time Map</Link></li>
                         </ul>
                     </div>
                     <div>

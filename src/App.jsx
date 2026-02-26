@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingLayout from './layouts/LandingLayout';
 import HospitalLayout from './layouts/HospitalLayout';
 import DonorLayout from './layouts/DonorLayout';
+import ScrollToTop from './components/ui/ScrollToTop';
 
 // Landing
 import LandingPage from './pages/LandingPage';
@@ -36,6 +37,7 @@ function App() {
     <AuthProvider>
       <HospitalAuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* ── Landing Portal ── */}
             <Route path="/" element={<LandingLayout />}>
