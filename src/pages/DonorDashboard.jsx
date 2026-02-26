@@ -24,18 +24,25 @@ import {
 } from '../data/mockData';
 
 const DonorDashboard = () => {
-    const { user, updateUser } = useAuth();
-    const [isAvailable, setIsAvailable] = useState(user?.availability || true);
+    const { user, updateUser, loading } = useAuth();
     const [activeTab, setActiveTab] = useState('impact'); // impact, rewards, records
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedHospital, setSelectedHospital] = useState(null);
 
-    if (!user) return <div className="p-20 text-center">Loading Hero Data...</div>;
+    if (loading) return <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="font-bold text-slate-500 italic">Syncing with Heartbeat...</p>
+    </div>;
+
+    if (!user) return <div className="p-20 text-center">
+        <p className="text-slate-500 font-bold mb-4">No donor profile found. Please complete registration.</p>
+        <Link to="/register"><Button>Go to Registration</Button></Link>
+    </div>;
+
+    const isAvailable = user.availability;
 
     const handleToggleAvailability = () => {
-        const newState = !isAvailable;
-        setIsAvailable(newState);
-        updateUser({ availability: newState });
+        updateUser({ availability: !isAvailable });
     };
 
     const handleSaveProfile = (updates) => {
@@ -69,7 +76,7 @@ const DonorDashboard = () => {
                 <div className="flex items-center space-x-6 relative z-10">
                     <div className="relative group">
                         <div className="w-24 h-24 bg-slate-100 rounded-[2rem] border-4 border-white shadow-lg overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
-                            <img src={`https://ui-avatars.com/api/?name=${user.name}&background=C62828&color=fff&size=128`} className="w-full h-full object-cover" />
+                            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Donor')}&background=C62828&color=fff&size=128`} className="w-full h-full object-cover" />
                         </div>
                         <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-sm border-4 border-white shadow-md rotate-12 italic">
                             {user.bloodType}
@@ -77,7 +84,7 @@ const DonorDashboard = () => {
                     </div>
                     <div>
                         <div className="flex items-center space-x-2">
-                            <h1 className="text-3xl font-black text-slate-800 tracking-tight italic">Hi, {user.name.split(' ')[0]}!</h1>
+                            <h1 className="text-3xl font-black text-slate-800 tracking-tight italic">Hi, {user.name ? user.name.split(' ')[0] : 'Hero'}!</h1>
                             <button
                                 onClick={() => setShowEditModal(true)}
                                 className="p-1.5 text-slate-300 hover:text-secondary rounded-lg transition-all"

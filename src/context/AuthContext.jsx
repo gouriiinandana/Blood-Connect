@@ -31,8 +31,47 @@ export const AuthProvider = ({ children }) => {
             .select('*')
             .eq('user_id', userId)
             .single();
-        if (!error && data) setDonor(data);
+        if (!error && data) {
+            // Map snake_case to camelCase
+            setDonor({
+                ...data,
+                name: data.full_name,
+                bloodType: data.blood_type,
+                dateOfBirth: data.date_of_birth,
+                lastDonationDate: data.last_donation_date,
+                totalDonations: data.total_donations,
+                isEligible: data.is_eligible,
+                points: data.points || 0,
+                livesSaved: data.lives_saved || 0,
+                location: `${data.city || ''}${data.city && data.state ? ', ' : ''}${data.state || ''}` || 'Location not set',
+                availability: data.emergency_available ?? true
+            });
+        }
         setLoading(false);
+    };
+
+    const updateProfile = async (updates) => {
+        if (!session?.user?.id) return;
+
+        // Map camelCase back to snake_case
+        const dbUpdates = {};
+        if (updates.name) dbUpdates.full_name = updates.name;
+        if (updates.phone) dbUpdates.phone = updates.phone;
+        if (updates.city) dbUpdates.city = updates.city;
+        if (updates.state) dbUpdates.state = updates.state;
+        if (updates.availability !== undefined) dbUpdates.emergency_available = updates.availability;
+        if (updates.points !== undefined) dbUpdates.points = updates.points;
+        if (updates.livesSaved !== undefined) dbUpdates.lives_saved = updates.livesSaved;
+
+        const { error } = await supabase
+            .from('donors')
+            .update(dbUpdates)
+            .eq('user_id', session.user.id);
+
+        if (!error) {
+            setDonor(prev => ({ ...prev, ...updates }));
+        }
+        return { error };
     };
 
     // ── Register donor ────────────────────────────────────────
@@ -78,12 +117,14 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         donor,
+        user: donor, // Alias for compatibility
         session,
         loading,
         isAuthenticated: !!session && !!donor,
         register,
         login,
         logout,
+        updateUser: updateProfile, // Alias for compatibility
     };
 
     return (
