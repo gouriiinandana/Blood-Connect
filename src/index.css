@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply bg-background text-slate-900 font-inter antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-outfit tracking-tight;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-3 rounded-2xl font-semibold hover:bg-primary-dark transition-all active:scale-[0.98] shadow-soft hover:shadow-lg hover:shadow-primary/20;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white px-6 py-3 rounded-2xl font-semibold hover:bg-secondary-dark transition-all active:scale-[0.98] shadow-soft hover:shadow-lg hover:shadow-secondary/20;
+  }
+
+  .card {
+    @apply bg-white rounded-3xl shadow-soft p-8 border border-slate-100/50 transition-all;
+  }
+}
+
+.pulse-red {
+  animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-red {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: .7;
+    transform: scale(1.02);
+  }
+}
