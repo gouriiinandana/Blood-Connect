@@ -14,6 +14,8 @@ const LandingPage = () => {
         { label: 'Inventory Level', value: 82, color: 'bg-primary', suffix: '', labelOverride: 'Critical' },
     ]);
 
+    const [inventory, setInventory] = React.useState(INVENTORY_DATA);
+
     const matches = [
         { type: 'O- Negative', status: 'Found' },
         { type: 'A+ Positive', status: 'Matched' },
@@ -44,9 +46,21 @@ const LandingPage = () => {
             }));
         }, 2000);
 
+        const inventoryInterval = setInterval(() => {
+            setInventory(prev => prev.map(item => {
+                const change = Math.random() > 0.7 ? (Math.random() > 0.5 ? 1 : -1) : 0;
+                const newUnits = Math.max(0, item.units + change);
+                let status = 'available';
+                if (newUnits < 10) status = 'critical';
+                else if (newUnits < 20) status = 'low';
+                return { ...item, units: newUnits, status };
+            }));
+        }, 4000);
+
         return () => {
             clearInterval(matchInterval);
             clearInterval(statsInterval);
+            clearInterval(inventoryInterval);
         };
     }, []);
 
@@ -145,7 +159,7 @@ const LandingPage = () => {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
-                        {INVENTORY_DATA.map((item) => (
+                        {inventory.map((item) => (
                             <BloodTypeCard key={item.type} {...item} />
                         ))}
                     </div>
