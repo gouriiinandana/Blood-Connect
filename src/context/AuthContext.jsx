@@ -16,10 +16,16 @@ export const AuthProvider = ({ children }) => {
             else setLoading(false);
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             setSession(session);
-            if (session) fetchDonorProfile(session.user.id);
-            else { setDonor(null); setLoading(false); }
+            if (event === 'PASSWORD_RECOVERY') {
+                setLoading(false);
+            } else if (session) {
+                fetchDonorProfile(session.user.id);
+            } else {
+                setDonor(null);
+                setLoading(false);
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -82,6 +88,12 @@ export const AuthProvider = ({ children }) => {
         if (error) throw error;
     };
 
+    // ── Update password ──────────────────────────────────────
+    const updatePassword = async (newPassword) => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+    };
+
     // ── Register donor ────────────────────────────────────────
     const register = async (formData) => {
         const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -133,6 +145,7 @@ export const AuthProvider = ({ children }) => {
         login,
         resetPassword,
         logout,
+        updatePassword,
         updateUser: updateProfile, // Alias for compatibility
     };
 

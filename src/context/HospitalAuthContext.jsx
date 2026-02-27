@@ -17,10 +17,17 @@ export const HospitalAuthProvider = ({ children }) => {
             else setLoading(false);
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             setSession(session);
-            if (session) fetchHospitalProfile(session.user.id);
-            else { setHospital(null); setLoading(false); }
+            if (event === 'PASSWORD_RECOVERY') {
+                // We're in recovery mode, don't fetch profile yet
+                setLoading(false);
+            } else if (session) {
+                fetchHospitalProfile(session.user.id);
+            } else {
+                setHospital(null);
+                setLoading(false);
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -102,6 +109,12 @@ export const HospitalAuthProvider = ({ children }) => {
         setSession(null);
     };
 
+    // ── Update password ──────────────────────────────────────
+    const updatePassword = async (newPassword) => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+    };
+
     // ── Update blood inventory ────────────────────────────────
     const updateInventory = async (bloodType, units) => {
         if (!hospital) return;
@@ -122,6 +135,7 @@ export const HospitalAuthProvider = ({ children }) => {
         login,
         resetPassword,
         logout,
+        updatePassword,
         updateInventory,
     };
 

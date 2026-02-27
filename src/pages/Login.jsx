@@ -8,12 +8,21 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [resetEmail, setResetEmail] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [showReset, setShowReset] = useState(false);
+    const [recoveryMode, setRecoveryMode] = useState(false);
     const [resetMessage, setResetMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, resetPassword } = useAuth();
+    const { login, resetPassword, updatePassword } = useAuth();
     const navigate = useNavigate();
+
+    // Check for recovery hash on mount
+    React.useEffect(() => {
+        if (window.location.hash && window.location.hash.includes('type=recovery')) {
+            setRecoveryMode(true);
+        }
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -44,6 +53,23 @@ const Login = () => {
         }
     };
 
+    const handleUpdatePassword = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setResetMessage('');
+        try {
+            await updatePassword(newPassword);
+            setResetMessage('Password updated successfully! You can now log in.');
+            setRecoveryMode(false);
+            setNewPassword('');
+        } catch (err) {
+            setError(err.message || 'Failed to update password.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-[calc(100vh-80px)] flex items-center justify-center py-12 px-6 sm:px-12 bg-slate-50">
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-slate-100 relative overflow-hidden">
@@ -57,21 +83,59 @@ const Login = () => {
                         <LogIn className="text-white" size={32} />
                     </div>
                     <h2 className="text-3xl font-bold text-slate-800 tracking-tight">
-                        {showReset ? 'Recover Access' : 'Welcome Back'}
+                        {recoveryMode ? 'Reset Password' : showReset ? 'Recover Access' : 'Welcome Back'}
                     </h2>
                     <p className="mt-2 text-slate-500 font-medium">
-                        {showReset ? 'We\'ll help you get back to saving lives.' : 'Log in to your Donor Hero portal.'}
+                        {recoveryMode ? 'Secure your Hero account with a new password.' : showReset ? 'We\'ll help you get back to saving lives.' : 'Log in to your Donor Hero portal.'}
                     </p>
                 </div>
 
-                {!showReset ? (
-                    <form className="mt-8 space-y-6 relative z-10" onSubmit={handleSubmit}>
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100 animate-in fade-in slide-in-from-top-2">
-                                {error}
-                            </div>
-                        )}
+                {error && (
+                    <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100 animate-in fade-in slide-in-from-top-2 relative z-10">
+                        {error}
+                    </div>
+                )}
 
+                {resetMessage && (
+                    <div className="bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-sm font-bold border border-emerald-100 animate-in fade-in relative z-10">
+                        {resetMessage}
+                    </div>
+                )}
+
+                {recoveryMode ? (
+                    <form className="mt-8 space-y-6 relative z-10" onSubmit={handleUpdatePassword}>
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                            <input
+                                type="password"
+                                required
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                placeholder="New Password"
+                            />
+                        </div>
+
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full h-14 text-lg shadow-xl shadow-primary/20"
+                        >
+                            {loading ? 'Securing...' : 'Update Password'}
+                        </Button>
+
+                        <div className="text-center">
+                            <button
+                                type="button"
+                                onClick={() => setRecoveryMode(false)}
+                                className="text-xs font-bold text-slate-400 hover:text-slate-600"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                ) : !showReset ? (
+                    <form className="mt-8 space-y-6 relative z-10" onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -121,12 +185,6 @@ const Login = () => {
                     </form>
                 ) : (
                     <form className="mt-8 space-y-6 relative z-10" onSubmit={handleResetSubmit}>
-                        {(error || resetMessage) && (
-                            <div className={`${resetMessage ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'} p-4 rounded-2xl text-sm font-bold border animate-in fade-in`}>
-                                {error || resetMessage}
-                            </div>
-                        )}
-
                         <div className="space-y-4">
                             <p className="text-sm text-slate-500 text-center px-4 font-medium">
                                 Lost your credentials? Enter your email and we'll send a recovery link immediately.

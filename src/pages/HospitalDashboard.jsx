@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Plus, Users, Activity, BrainCircuit, Clock, ArrowUpRight,
     Droplet, AlertTriangle, CheckCircle, MinusCircle, Siren,
-    ExternalLink, LogOut, Building2
+    ExternalLink, LogOut, Building2, TrendingUp
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
@@ -113,6 +113,22 @@ const HospitalDashboard = () => {
     const { hospital, logout } = useHospitalAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('inventory');
+    const [inventory, setInventory] = useState({});
+
+    useEffect(() => {
+        if (!hospital?.id) return;
+        supabase
+            .from('blood_inventory')
+            .select('blood_type, units')
+            .eq('hospital_id', hospital.id)
+            .then(({ data }) => {
+                if (data) {
+                    const inv = {};
+                    data.forEach(row => { inv[row.blood_type] = row.units; });
+                    setInventory(inv);
+                }
+            });
+    }, [hospital?.id]);
 
     const handleLogout = async () => {
         await logout();
@@ -120,6 +136,13 @@ const HospitalDashboard = () => {
     };
 
     const activeEmergencies = hospital?.emergencies || [];
+
+    // Map inventory for BloodTypeCard
+    const inventoryDataList = BLOOD_TYPES.map(type => ({
+        type,
+        units: inventory[type] ?? 0,
+        status: (inventory[type] ?? 0) === 0 ? 'critical' : (inventory[type] ?? 0) < 20 ? 'low' : 'available'
+    }));
 
     return (
         <div className="space-y-8 pb-12">
@@ -133,7 +156,7 @@ const HospitalDashboard = () => {
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Authorized Facility</p>
-                                <p className="font-bold text-slate-800 text-sm">{hospital.name} · REG #{hospital.registrationNo}</p>
+                                <p className="font-bold text-slate-800 text-sm">{hospital.name} · REG #{hospital.reg_number}</p>
                             </div>
                         </div>
                     )}
@@ -182,7 +205,7 @@ const HospitalDashboard = () => {
             {/* Top Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                    { label: 'Total Units', value: '194', change: '+12%', icon: Activity, color: 'text-secondary bg-secondary/10' },
+                    { label: 'Total Units', value: Object.values(inventory).reduce((a, b) => a + b, 0).toString(), change: '+12%', icon: Activity, color: 'text-secondary bg-secondary/10' },
                     { label: 'Active Donors', value: '1,248', change: '+5.4%', icon: Users, color: 'text-emerald-600 bg-emerald-50' },
                     { label: 'AI Match Rate', value: '98.2%', change: 'Optimal', icon: BrainCircuit, color: 'text-primary bg-primary/5' },
                     { label: 'Pending Deliveries', value: '14', change: '3 urgent', icon: Clock, color: 'text-amber-600 bg-amber-50' },
@@ -228,7 +251,7 @@ const HospitalDashboard = () => {
                         <div className="space-y-8">
                             <ChartWrapper data={DEPLETION_STATS} />
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-8">
-                                {INVENTORY_DATA.map(item => (
+                                {inventoryDataList.map(item => (
                                     <BloodTypeCard key={item.type} {...item} />
                                 ))}
                             </div>
@@ -241,7 +264,7 @@ const HospitalDashboard = () => {
             {!hospital && (
                 <Card title="Live Inventory">
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-                        {INVENTORY_DATA.map(item => (
+                        {inventoryDataList.map(item => (
                             <BloodTypeCard key={item.type} {...item} />
                         ))}
                     </div>

@@ -7,12 +7,21 @@ import Button from '../components/ui/Button';
 const HospitalLogin = () => {
     const [form, setForm] = useState({ email: '', password: '' });
     const [resetEmail, setResetEmail] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [showReset, setShowReset] = useState(false);
+    const [recoveryMode, setRecoveryMode] = useState(false);
     const [resetMessage, setResetMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, resetPassword } = useHospitalAuth();
+    const { login, resetPassword, updatePassword } = useHospitalAuth();
     const navigate = useNavigate();
+
+    // Check for recovery hash on mount
+    React.useEffect(() => {
+        if (window.location.hash && window.location.hash.includes('type=recovery')) {
+            setRecoveryMode(true);
+        }
+    }, []);
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -42,6 +51,23 @@ const HospitalLogin = () => {
             setResetMessage('A password reset link has been sent to your hospital email.');
         } catch (err) {
             setError(err.message || 'Failed to send reset link.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdatePassword = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setResetMessage('');
+        try {
+            await updatePassword(newPassword);
+            setResetMessage('Password updated successfully! You can now log in.');
+            setRecoveryMode(false);
+            setNewPassword('');
+        } catch (err) {
+            setError(err.message || 'Failed to update password.');
         } finally {
             setLoading(false);
         }
@@ -89,7 +115,43 @@ const HospitalLogin = () => {
                             </div>
                         )}
 
-                        {!showReset ? (
+                        {recoveryMode ? (
+                            <form onSubmit={handleUpdatePassword} className="space-y-5">
+                                <div className="p-4 bg-slate-50 rounded-2xl mb-4">
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+                                        Set New Passcode
+                                    </p>
+                                    <p className="text-[10px] text-slate-400 mt-1 font-medium"> Secure your administrative session with a new password.</p>
+                                </div>
+                                <div className="relative">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                    <input
+                                        type="password"
+                                        required
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        placeholder="New Password"
+                                        className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full h-14 text-lg bg-secondary shadow-xl shadow-secondary/25"
+                                >
+                                    {loading ? 'Securing...' : 'Update Password'}
+                                </Button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setRecoveryMode(false)}
+                                    className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors py-2"
+                                >
+                                    Cancel Recovery
+                                </button>
+                            </form>
+                        ) : !showReset ? (
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div className="relative">
                                     <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
