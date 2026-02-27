@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Heart, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -14,15 +14,22 @@ const Login = () => {
     const [resetMessage, setResetMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, resetPassword, updatePassword } = useAuth();
+    const { login, resetPassword, updatePassword, isAuthenticated, session } = useAuth();
     const navigate = useNavigate();
 
-    // Check for recovery hash on mount
-    React.useEffect(() => {
-        if (window.location.hash && window.location.hash.includes('type=recovery')) {
+    // 1. Check for recovery hash on mount
+    useEffect(() => {
+        if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token='))) {
             setRecoveryMode(true);
         }
     }, []);
+
+    // 2. Auto-redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated && !recoveryMode) {
+            navigate('/donor/dashboard');
+        }
+    }, [isAuthenticated, recoveryMode, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,9 +67,15 @@ const Login = () => {
         setResetMessage('');
         try {
             await updatePassword(newPassword);
-            setResetMessage('Password updated successfully! You can now log in.');
-            setRecoveryMode(false);
-            setNewPassword('');
+            setResetMessage('Success! Your Hero account is secured. Redirecting to dashboard...');
+
+            // Clear hash
+            window.history.replaceState(null, null, ' ');
+
+            setTimeout(() => {
+                setRecoveryMode(false);
+                navigate('/donor/dashboard');
+            }, 2000);
         } catch (err) {
             setError(err.message || 'Failed to update password.');
         } finally {
@@ -104,11 +117,18 @@ const Login = () => {
 
                 {recoveryMode ? (
                     <form className="mt-8 space-y-6 relative z-10" onSubmit={handleUpdatePassword}>
+                        <div className="p-4 bg-slate-50 rounded-2xl mb-4">
+                            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
+                                Set New Passcode
+                            </p>
+                            <p className="text-[10px] text-slate-400 mt-1 font-medium"> Recovering access for: <span className="text-slate-600 font-bold">{session?.user?.email || 'Authenticated User'}</span></p>
+                        </div>
                         <div className="relative">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                             <input
                                 type="password"
                                 required
+                                minLength={6}
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all font-medium text-slate-800 placeholder:text-slate-400"
@@ -121,13 +141,16 @@ const Login = () => {
                             disabled={loading}
                             className="w-full h-14 text-lg shadow-xl shadow-primary/20"
                         >
-                            {loading ? 'Securing...' : 'Update Password'}
+                            {loading ? 'Securing...' : 'Update & Log In'}
                         </Button>
 
                         <div className="text-center">
                             <button
                                 type="button"
-                                onClick={() => setRecoveryMode(false)}
+                                onClick={() => {
+                                    window.history.replaceState(null, null, ' ');
+                                    setRecoveryMode(false);
+                                }}
                                 className="text-xs font-bold text-slate-400 hover:text-slate-600"
                             >
                                 Cancel

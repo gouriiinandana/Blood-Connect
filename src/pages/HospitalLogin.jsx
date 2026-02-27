@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Hospital, Lock, Hash, ArrowRight, ShieldCheck, LogIn } from 'lucide-react';
 import { useHospitalAuth } from '../context/HospitalAuthContext';
@@ -13,15 +13,22 @@ const HospitalLogin = () => {
     const [resetMessage, setResetMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, resetPassword, updatePassword } = useHospitalAuth();
+    const { login, resetPassword, updatePassword, isAuthenticated, session } = useHospitalAuth();
     const navigate = useNavigate();
 
-    // Check for recovery hash on mount
-    React.useEffect(() => {
-        if (window.location.hash && window.location.hash.includes('type=recovery')) {
+    // 1. Check for recovery hash on mount
+    useEffect(() => {
+        if (window.location.hash && (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token='))) {
             setRecoveryMode(true);
         }
     }, []);
+
+    // 2. Auto-redirect if authenticated
+    useEffect(() => {
+        if (isAuthenticated && !recoveryMode) {
+            navigate('/hospital');
+        }
+    }, [isAuthenticated, recoveryMode, navigate]);
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -63,9 +70,17 @@ const HospitalLogin = () => {
         setResetMessage('');
         try {
             await updatePassword(newPassword);
-            setResetMessage('Password updated successfully! You can now log in.');
-            setRecoveryMode(false);
-            setNewPassword('');
+            setResetMessage('Success! Your password has been secured. Redirecting you to the portal...');
+
+            // Clear the hash so the user doesn't get stuck in recovery mode on refresh
+            window.history.replaceState(null, null, ' ');
+
+            // Short delay to let the user see the success message
+            setTimeout(() => {
+                setRecoveryMode(false);
+                navigate('/hospital');
+            }, 2000);
+
         } catch (err) {
             setError(err.message || 'Failed to update password.');
         } finally {
@@ -98,9 +113,7 @@ const HospitalLogin = () => {
                         {/* Trust Badge */}
                         <div className="flex items-center space-x-2 bg-emerald-50 border border-emerald-100 p-3 rounded-2xl mb-8">
                             <ShieldCheck size={18} className="text-emerald-600" />
-                            <div className="mt-8 pt-8 border-t border-slate-50">
-                                <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-[0.3em]">Institutional Verification Required</p>
-                            </div>
+                            <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-[0.3em]">Institutional Verification Required</p>
                         </div>
 
                         {error && (
@@ -121,16 +134,17 @@ const HospitalLogin = () => {
                                     <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
                                         Set New Passcode
                                     </p>
-                                    <p className="text-[10px] text-slate-400 mt-1 font-medium"> Secure your administrative session with a new password.</p>
+                                    <p className="text-[10px] text-slate-400 mt-1 font-medium"> Recovering access for: <span className="text-slate-600 font-bold">{session?.user?.email || 'Authenticated User'}</span></p>
                                 </div>
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                                     <input
                                         type="password"
                                         required
+                                        minLength={6}
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
-                                        placeholder="New Password"
+                                        placeholder="New Secure Password"
                                         className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
                                     />
                                 </div>
@@ -140,12 +154,15 @@ const HospitalLogin = () => {
                                     disabled={loading}
                                     className="w-full h-14 text-lg bg-secondary shadow-xl shadow-secondary/25"
                                 >
-                                    {loading ? 'Securing...' : 'Update Password'}
+                                    {loading ? 'Securing Access...' : 'Update & Log In'}
                                 </Button>
 
                                 <button
                                     type="button"
-                                    onClick={() => setRecoveryMode(false)}
+                                    onClick={() => {
+                                        window.history.replaceState(null, null, ' ');
+                                        setRecoveryMode(false);
+                                    }}
                                     className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors py-2"
                                 >
                                     Cancel Recovery
