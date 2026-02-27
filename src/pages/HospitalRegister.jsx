@@ -104,7 +104,7 @@ const HospitalRegister = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="md:col-span-2 relative">
                                         <Hospital className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="name" value={form.name} onChange={handleChange} placeholder="Official Hospital Name" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="name" value={form.name} onChange={handleChange} placeholder="Official Hospital Name" className="hospital-input pl-12" />
                                     </div>
 
                                     {/* Hospital Type Selector */}
@@ -127,17 +127,17 @@ const HospitalRegister = () => {
 
                                     <div className="relative">
                                         <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="registrationNo" value={form.registrationNo} onChange={handleChange} placeholder="Official Reg. Number" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="registrationNo" value={form.registrationNo} onChange={handleChange} placeholder="Official Reg. Number" className="hospital-input pl-12" />
                                     </div>
 
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Official Email" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Official Email" className="hospital-input pl-12" />
                                     </div>
 
                                     <div className="relative">
                                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="phone" value={form.phone} onChange={handleChange} placeholder="Contact Phone" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="phone" value={form.phone} onChange={handleChange} placeholder="Contact Phone" className="hospital-input pl-12" />
                                     </div>
                                 </div>
                             </div>
@@ -147,24 +147,24 @@ const HospitalRegister = () => {
                         {currentStep === 1 && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <input name="state" value={form.state} onChange={handleChange} placeholder="State" className="block w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
-                                    <input name="city" value={form.city} onChange={handleChange} placeholder="City" className="block w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                    <input name="state" value={form.state} onChange={handleChange} placeholder="State" className="hospital-input" />
+                                    <input name="city" value={form.city} onChange={handleChange} placeholder="City" className="hospital-input" />
 
                                     <div className="md:col-span-2 relative">
                                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="address" value={form.address} onChange={handleChange} placeholder="Full Street Address" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="address" value={form.address} onChange={handleChange} placeholder="Full Street Address" className="hospital-input pl-12" />
                                     </div>
 
-                                    <input name="pincode" value={form.pincode} onChange={handleChange} placeholder="Pincode" className="block w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                    <input name="pincode" value={form.pincode} onChange={handleChange} placeholder="Pincode" className="hospital-input" />
 
                                     <div className="relative">
                                         <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
-                                        <input name="bedCapacity" type="number" value={form.bedCapacity} onChange={handleChange} placeholder="Total Bed Capacity" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="bedCapacity" type="number" value={form.bedCapacity} onChange={handleChange} placeholder="Total Bed Capacity" className="hospital-input pl-12" />
                                     </div>
 
                                     <div className="md:col-span-2 relative">
                                         <ClipboardList className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="licenceNo" value={form.licenceNo} onChange={handleChange} placeholder="Blood Bank Licence Number (e.g. TN-BB-2024-001)" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="licenceNo" value={form.licenceNo} onChange={handleChange} placeholder="Blood Bank Licence Number (e.g. TN-BB-2024-001)" className="hospital-input pl-12" />
                                     </div>
                                 </div>
 
@@ -190,11 +190,11 @@ const HospitalRegister = () => {
                                 <div className="space-y-4">
                                     <div className="relative">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Create Strong Password" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Create Strong Password" className="hospital-input pl-12" />
                                     </div>
                                     <div className="relative">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={20} />
-                                        <input name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} placeholder="Confirm Password" className="block w-full pl-12 pr-5 py-4 bg-slate-50 border-none rounded-2xl font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none transition-all focus:ring-2 focus:ring-secondary/20" />
+                                        <input name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} placeholder="Confirm Password" className="hospital-input pl-12" />
                                     </div>
                                     {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
                                         <p className="text-red-500 text-xs font-bold pl-1">Passwords do not match.</p>
@@ -243,6 +243,11 @@ const HospitalRegister = () => {
             </div>
 
 
+            <style sx>{`
+                .hospital-input {
+                    @apply block w-full px-5 py-4 bg-slate-50 border border-slate-200/50 rounded-2xl focus:ring-4 focus:ring-secondary/10 focus:bg-white focus:border-secondary/30 transition-all font-outfit font-semibold text-slate-800 placeholder:text-slate-400 text-sm outline-none shadow-sm;
+                }
+            `}</style>
         </div>
     );
 };

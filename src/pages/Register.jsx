@@ -280,7 +280,7 @@ const Register = () => {
 
             <style sx>{`
                 .register-input {
-                    @apply block w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all font-medium text-slate-800 placeholder:text-slate-400 text-sm outline-none;
+                    @apply block w-full px-5 py-4 bg-slate-50 border border-slate-200/50 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:bg-white focus:border-primary/30 transition-all font-outfit font-semibold text-slate-800 placeholder:text-slate-400 text-sm outline-none shadow-sm;
                 }
             `}</style>
         </div>
