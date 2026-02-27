@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Activity, MapPin, Clock, TrendingUp, Heart,
     AlertCircle, ChevronRight, ExternalLink, ShieldCheck,
@@ -15,21 +15,76 @@ import MapContainer from '../components/ui/MapContainer';
 import EditProfileModal from '../components/donor/EditProfileModal';
 import SlotBookingModal from '../components/donor/SlotBookingModal';
 import { HeartHeroVisual } from '../components/3d/ThreeVisuals';
+import { supabase } from '../lib/supabase';
 import {
     DONOR_ACHIEVEMENTS,
     REWARDS,
-    NEARBY_HOSPITALS,
-    DONATION_HISTORY,
-    RECENT_REQUESTS
+    DONATION_HISTORY
 } from '../data/mockData';
 
 const DonorDashboard = () => {
-    const { user, updateUser, loading } = useAuth();
+    const { user, updateUser, loading: authLoading } = useAuth();
     const [activeTab, setActiveTab] = useState('impact'); // impact, rewards, records
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedHospital, setSelectedHospital] = useState(null);
+    const [hospitals, setHospitals] = useState([]);
+    const [alerts, setAlerts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    if (loading) return <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                // 1. Fetch real hospitals
+                const { data: hospData, error: hospError } = await supabase
+                    .from('hospitals')
+                    .select('*')
+                    .limit(5);
+
+                if (hospError) throw hospError;
+
+                // 2. Fetch inventory for alerts
+                const { data: inventoryData, error: invError } = await supabase
+                    .from('blood_inventory')
+                    .select('*, hospitals(name)')
+                    .lt('units', 10) // Only fetch low/critical stock
+                    .limit(10);
+
+                if (invError) throw invError;
+
+                // Process hospitals for Nearby list
+                const processedHospitals = (hospData || []).map(h => ({
+                    id: h.id,
+                    name: h.name,
+                    distance: (Math.random() * 8 + 1).toFixed(1) + ' km',
+                    stock: 'Stable', // Default, would need more complex query to be real
+                    need: user?.bloodType || 'O-',
+                    address: h.address || h.city
+                }));
+
+                // Process inventory into alerts
+                const processedAlerts = (inventoryData || []).map(inv => ({
+                    hospital: inv.hospitals.name,
+                    type: inv.blood_type,
+                    urgency: inv.units < 5 ? 'critical' : 'high',
+                    units: inv.units,
+                    time: 'Live Alert'
+                }));
+
+                setHospitals(processedHospitals);
+                setAlerts(processedAlerts.length > 0 ? processedAlerts : [
+                    { hospital: 'City Memorial', type: user?.bloodType || 'O-', urgency: 'critical', units: 2, time: '10m ago' }
+                ]);
+            } catch (err) {
+                console.error("Dashboard Sync Error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (user) fetchDashboardData();
+    }, [user]);
+
+    if (authLoading || loading) return <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p className="font-bold text-slate-500">Syncing donor profile...</p>
     </div>;
@@ -144,21 +199,21 @@ const DonorDashboard = () => {
                             <div className="space-y-3">
                                 <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
                                     <span>{user.points} XP Accumulated</span>
-                                    <span>Goal: {levelInfo.next} XP</span>
+                                    <span>Goal: {levelInfo.next === 'MAX' ? user.points : levelInfo.next} XP</span>
                                 </div>
                                 <div className="h-2.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                    <div className="h-full bg-emerald-400 transition-all duration-1000" style={{ width: `${(user.points / levelInfo.next) * 100}%` }}></div>
+                                    <div className="h-full bg-emerald-400 transition-all duration-1000" style={{ width: `${levelInfo.next === 'MAX' ? 100 : (user.points / levelInfo.next) * 100}%` }}></div>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/10">
                                 <div>
-                                    <p className="text-lg font-bold">3</p>
+                                    <p className="text-lg font-bold">{Math.floor(user.points / 150)}</p>
                                     <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">Verified Acts</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-lg font-bold">Feb 12</p>
-                                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">Next Cycle</p>
+                                    <p className="text-lg font-bold">{new Date().toLocaleString('en-US', { month: 'short', day: 'numeric' })}</p>
+                                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">Access Date</p>
                                 </div>
                             </div>
                         </div>
@@ -179,9 +234,9 @@ const DonorDashboard = () => {
                     </Card>
 
                     {/* Hospital Availability View */}
-                    <Card title="Nearby Coordination" subtitle="Hospitals needing your blood type">
+                    <Card title="Nearby Coordination" subtitle="Hospitals needing blood types">
                         <div className="space-y-4">
-                            {NEARBY_HOSPITALS.map((h, i) => (
+                            {hospitals.map((h, i) => (
                                 <div key={i} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100/50 hover:border-secondary/20 hover:bg-white transition-all group">
                                     <div className="flex justify-between items-center">
                                         <div>
@@ -216,10 +271,10 @@ const DonorDashboard = () => {
                         className="bg-red-50/20 border-red-100"
                     >
                         <div className="space-y-6 mt-4">
-                            {RECENT_REQUESTS.map((alert, i) => {
+                            {alerts.map((alert, i) => {
                                 const isMatch = alert.type === user.bloodType;
                                 return (
-                                    <div key={i} className={`flex flex-col sm:row items-center border rounded-[2.5rem] p-8 transition-all bg-white ${isMatch ? 'border-emerald-200 shadow-lg shadow-emerald-500/5 pulse-green' : 'border-slate-100 shadow-soft'}`}>
+                                    <div key={i} className={`flex flex-col sm:flex-row items-center border rounded-[2.5rem] p-8 transition-all bg-white ${isMatch ? 'border-emerald-200 shadow-lg shadow-emerald-500/5 pulse-green' : 'border-slate-100 shadow-soft'}`}>
                                         <div className="w-full sm:w-auto flex items-center mb-6 sm:mb-0">
                                             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mr-6 shadow-inner ${alert.urgency === 'critical' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
                                                 <AlertCircle size={32} />
@@ -303,7 +358,7 @@ const DonorDashboard = () => {
                                     <table className="w-full text-left">
                                         <thead>
                                             <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] border-b border-slate-100">
-                                                <th className="pb-6">Event Date awake</th>
+                                                <th className="pb-6">Event Date </th>
                                                 <th className="pb-6">Medical Facility</th>
                                                 <th className="pb-6">Unit Type</th>
                                                 <th className="pb-6 text-right">XP Reward</th>

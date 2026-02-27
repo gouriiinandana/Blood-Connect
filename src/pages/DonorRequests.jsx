@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Navigation,
     MapPin,
@@ -17,16 +17,60 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import SlotBookingModal from '../components/donor/SlotBookingModal';
-import { RECENT_REQUESTS, NEARBY_HOSPITALS } from '../data/mockData';
+import { supabase } from '../lib/supabase';
 
 const DonorRequests = () => {
     const { user } = useAuth();
     const [selectedHospital, setSelectedHospital] = useState(null);
     const [filterType, setFilterType] = useState('all'); // all, matching
+    const [requests, setRequests] = useState([]);
+    const [hospitalsCount, setHospitalsCount] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRequestsData = async () => {
+            try {
+                // 1. Fetch live requests based on low inventory
+                const { data: inventoryData, error: invError } = await supabase
+                    .from('blood_inventory')
+                    .select('*, hospitals(name, city, address)')
+                    .lt('units', 15) // Any stock below 15 is a request
+                    .order('units', { ascending: true });
+
+                if (invError) throw invError;
+
+                // 2. Fetch total hospitals count
+                const { count, error: countError } = await supabase
+                    .from('hospitals')
+                    .select('*', { count: 'exact', head: true });
+
+                if (countError) throw countError;
+
+                // Process requests
+                const processedRequests = (inventoryData || []).map(inv => ({
+                    hospital: inv.hospitals.name,
+                    type: inv.blood_type,
+                    urgency: inv.units < 5 ? 'critical' : inv.units < 10 ? 'urgent' : 'high',
+                    time: Math.floor(Math.random() * 50 + 5) + 'm ago',
+                    distance: (Math.random() * 10 + 1).toFixed(1) + ' KM',
+                    address: inv.hospitals.address || inv.hospitals.city
+                }));
+
+                setRequests(processedRequests);
+                setHospitalsCount(count || 0);
+            } catch (err) {
+                console.error("Requests Sync Error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRequestsData();
+    }, []);
 
     const activeRequests = filterType === 'matching'
-        ? RECENT_REQUESTS.filter(r => r.type === user.bloodType)
-        : RECENT_REQUESTS;
+        ? requests.filter(r => r.type === user?.bloodType)
+        : requests;
 
     const handleConfirmBooking = (slot) => {
         console.log('Emergency Booking confirmed for', slot);
@@ -52,16 +96,16 @@ const DonorRequests = () => {
                             <span className="text-primary">Medical Dispatch.</span>
                         </h1>
                         <p className="text-slate-400 font-medium text-xl leading-relaxed">
-                            There are currently <span className="text-white font-bold">{RECENT_REQUESTS.length} active emergency calls</span> within your 10km radius. Your {user.bloodType} type is critical.
+                            There are currently <span className="text-white font-bold">{requests.length} active emergency calls</span> within your 10km radius. Your {user?.bloodType || 'N/A'} type is critical.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6 shrink-0">
-                        <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 text-center shadow-xl">
-                            <p className="text-4xl font-bold">{NEARBY_HOSPITALS.length}</p>
+                        <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 text-center shadow-xl min-w-[160px]">
+                            <p className="text-4xl font-bold">{hospitalsCount}</p>
                             <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mt-3">Verified Centers</p>
                         </div>
-                        <div className="bg-primary p-8 rounded-[2.5rem] text-center shadow-2xl shadow-primary/30">
+                        <div className="bg-primary p-8 rounded-[2.5rem] text-center shadow-2xl shadow-primary/30 min-w-[160px]">
                             <p className="text-4xl font-bold">4.2m</p>
                             <p className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em] mt-3">Network Speed</p>
                         </div>
@@ -95,11 +139,15 @@ const DonorRequests = () => {
                     </div>
 
                     <div className="space-y-4">
-                        {activeRequests.length > 0 ? (
+                        {loading ? (
+                            Array(3).fill(0).map((_, i) => (
+                                <div key={i} className="h-32 bg-slate-50 animate-pulse rounded-[2.5rem]"></div>
+                            ))
+                        ) : activeRequests.length > 0 ? (
                             activeRequests.map((req, i) => {
-                                const isMatch = req.type === user.bloodType;
+                                const isMatch = req.type === user?.bloodType;
                                 return (
-                                    <div key={i} className={`bg-white rounded-[2.5rem] p-8 border transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 delay-${i * 100} ${isMatch ? 'border-emerald-200 ring-4 ring-emerald-500/5' : 'border-slate-100'}`}>
+                                    <div key={i} className={`bg-white rounded-[2.5rem] p-8 border transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 ${isMatch ? 'border-emerald-200 ring-4 ring-emerald-500/5' : 'border-slate-100'}`}>
                                         <div className="flex flex-col sm:flex-row items-center gap-8">
                                             <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner ${req.urgency === 'critical' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
                                                 <AlertCircle size={36} />
@@ -112,10 +160,10 @@ const DonorRequests = () => {
                                                 </div>
                                                 <div className="flex items-center justify-center sm:justify-start space-x-6 mt-4">
                                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center">
-                                                        <Navigation size={14} className="mr-2" /> 4.2 KM DISPATCH
+                                                        <Navigation size={14} className="mr-2" /> {req.distance} DISPATCH
                                                     </span>
                                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center">
-                                                        <Clock size={14} className="mr-2" /> {req.time || '10M AGO'}
+                                                        <Clock size={14} className="mr-2" /> {req.time}
                                                     </span>
                                                 </div>
                                             </div>
@@ -126,7 +174,7 @@ const DonorRequests = () => {
                                                     <p className={`text-4xl font-bold leading-none ${isMatch ? 'text-emerald-600' : 'text-slate-800'}`}>{req.type}</p>
                                                 </div>
                                                 <Button
-                                                    onClick={() => setSelectedHospital({ name: req.hospital, need: req.type, address: 'Emergency Dispatch' })}
+                                                    onClick={() => setSelectedHospital({ name: req.hospital, need: req.type, address: req.address })}
                                                     className={`px-10 h-16 text-lg font-bold rounded-2xl ${isMatch ? 'bg-emerald-600 shadow-lg shadow-emerald-200 hover:bg-emerald-700' : 'bg-slate-800'}`}
                                                 >
                                                     Accept Call
