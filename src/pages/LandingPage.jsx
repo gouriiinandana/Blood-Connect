@@ -153,22 +153,34 @@ const LandingPage = () => {
             </section>
 
             {/* How It Works */}
-            <section id="how-it-works" className="py-32 px-6 sm:px-12 max-w-7xl mx-auto relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
-                    {[
-                        { icon: User, title: 'Register', desc: 'Create your donor profile. Manage availability and preferences securely with healthcare protocols.' },
-                        { icon: Zap, title: 'Match', desc: 'Our AI instantly matches your blood type with emergency hospital requests within seconds.' },
-                        { icon: Heart, title: 'Save Lives', desc: 'Respond to alerts, donate at nearby facilities, and track your life-saving impact over time.' }
-                    ].map((step, i) => (
-                        <div key={i} className="relative group p-12 rounded-[3rem] bg-white border border-slate-50 shadow-soft hover:shadow-lg transition-all">
-                            <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center mb-10 shadow-sm group-hover:scale-105 group-hover:bg-primary group-hover:text-white transition-all">
-                                <step.icon size={36} />
-                            </div>
-                            <h3 className="text-3xl font-bold text-slate-800 mb-6 tracking-tight">{step.title}</h3>
-                            <p className="text-slate-500 font-medium text-lg leading-relaxed">{step.desc}</p>
-                            <div className="absolute top-10 right-10 text-9xl font-bold text-slate-100/50 -z-10 group-hover:text-primary/5 transition-colors">0{i + 1}</div>
+            <section id="how-it-works" className="py-32 px-6 sm:px-12 bg-white relative z-10 scroll-mt-20">
+                <div className="max-w-7xl mx-auto space-y-20">
+                    <div className="text-center space-y-6">
+                        <div className="inline-flex items-center px-4 py-2 bg-primary/5 text-primary rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-primary/10">
+                            The Life-Saving Process
                         </div>
-                    ))}
+                        <h2 className="text-4xl sm:text-6xl font-bold text-slate-800 tracking-tight">How It Works</h2>
+                        <p className="text-slate-500 max-w-2xl mx-auto text-lg font-medium leading-relaxed">
+                            A seamless coordination between donors and hospitals, powered by AI to ensure no emergency goes unanswered.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+                        {[
+                            { icon: User, title: 'Register', desc: 'Create your donor profile. Manage availability and preferences securely with healthcare protocols.' },
+                            { icon: Zap, title: 'Match', desc: 'Our AI instantly matches your blood type with emergency hospital requests within seconds.' },
+                            { icon: Heart, title: 'Save Lives', desc: 'Respond to alerts, donate at nearby facilities, and track your life-saving impact over time.' }
+                        ].map((step, i) => (
+                            <div key={i} className="relative group p-12 rounded-[3rem] bg-white border border-slate-50 shadow-soft hover:shadow-lg transition-all">
+                                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center mb-10 shadow-sm group-hover:scale-105 group-hover:bg-primary group-hover:text-white transition-all">
+                                    <step.icon size={36} />
+                                </div>
+                                <h3 className="text-3xl font-bold text-slate-800 mb-6 tracking-tight">{step.title}</h3>
+                                <p className="text-slate-500 font-medium text-lg leading-relaxed">{step.desc}</p>
+                                <div className="absolute top-10 right-10 text-9xl font-bold text-slate-100/50 -z-10 group-hover:text-primary/5 transition-colors">0{i + 1}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
