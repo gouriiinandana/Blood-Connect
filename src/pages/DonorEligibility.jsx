@@ -134,8 +134,10 @@ const DonorEligibility = () => {
                                 onClick={handleNext}
                                 className="h-14 px-10 text-lg shadow-xl shadow-primary/20 pulse-red"
                             >
-                                Finalize Verification
-                                <ArrowRight size={20} className="ml-2" />
+                                <span className="flex items-center justify-center gap-2">
+                                    Finalize Verification
+                                    <ArrowRight size={20} />
+                                </span>
                             </Button>
                         ) : (
                             <div className="h-1 w-24 bg-slate-50 rounded-full overflow-hidden">
