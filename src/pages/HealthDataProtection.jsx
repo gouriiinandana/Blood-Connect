@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
     ShieldCheck, FileText, Lock, Users, UserCog,
-    Server, AlertTriangle, Heart, ChevronDown, ArrowRight
+    Server, AlertTriangle, Heart, ChevronDown, ArrowRight, Shield
 } from 'lucide-react';
 
 // ─── Scroll-reveal hook ───────────────────────────────────────────────────────
