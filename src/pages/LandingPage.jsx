@@ -7,6 +7,21 @@ import BloodTypeCard from '../components/ui/BloodTypeCard';
 import { INVENTORY_DATA } from '../data/mockData';
 
 const LandingPage = () => {
+    const [matchIndex, setMatchIndex] = React.useState(0);
+    const matches = [
+        { type: 'O- Negative', status: 'Found' },
+        { type: 'A+ Positive', status: 'Matched' },
+        { type: 'B- Negative', status: 'Emergency' },
+        { type: 'AB+ Alert', status: 'Verified' }
+    ];
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setMatchIndex((prev) => (prev + 1) % matches.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div className="space-y-24 pb-24 relative overflow-hidden">
             <BloodCellNetwork />
@@ -72,13 +87,15 @@ const LandingPage = () => {
                     </div>
 
                     {/* Floating element */}
-                    <div className="absolute -bottom-16 -right-4 lg:-right-10 bg-white p-6 rounded-[2rem] shadow-lg border border-slate-100 flex items-center space-x-4 animate-bounce z-20">
+                    <div className="absolute -bottom-24 -right-4 lg:-right-10 bg-white p-6 rounded-[2rem] shadow-lg border border-slate-100 flex items-center space-x-4 animate-bounce z-20 transition-all duration-500">
                         <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 shadow-inner shrink-0">
                             <Heart size={24} fill="currentColor" />
                         </div>
-                        <div>
+                        <div className="min-w-[140px]">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">New Match</p>
-                            <p className="text-base font-bold text-slate-800">O- Negative Found</p>
+                            <p className="text-base font-bold text-slate-800 transition-opacity duration-300">
+                                {matches[matchIndex].type} {matches[matchIndex].status}
+                            </p>
                         </div>
                     </div>
                 </div>
