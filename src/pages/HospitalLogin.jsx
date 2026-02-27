@@ -6,9 +6,12 @@ import Button from '../components/ui/Button';
 
 const HospitalLogin = () => {
     const [form, setForm] = useState({ email: '', password: '' });
+    const [resetEmail, setResetEmail] = useState('');
+    const [showReset, setShowReset] = useState(false);
+    const [resetMessage, setResetMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useHospitalAuth();
+    const { login, resetPassword } = useHospitalAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -24,6 +27,21 @@ const HospitalLogin = () => {
             navigate('/hospital');
         } catch (err) {
             setError(err.message || 'Login failed. Please check your credentials.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResetSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setResetMessage('');
+        try {
+            await resetPassword(resetEmail);
+            setResetMessage('A password reset link has been sent to your hospital email.');
+        } catch (err) {
+            setError(err.message || 'Failed to send reset link.');
         } finally {
             setLoading(false);
         }
@@ -65,44 +83,93 @@ const HospitalLogin = () => {
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div className="relative">
-                                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                                <input
-                                    name="email"
-                                    type="email"
-                                    required
-                                    value={form.email}
-                                    onChange={handleChange}
-                                    placeholder="Hospital Email Address"
-                                    className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
-                                />
+                        {resetMessage && (
+                            <div className="bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-sm font-bold border border-emerald-100 mb-6 animate-in fade-in">
+                                {resetMessage}
                             </div>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                                <input
-                                    name="password"
-                                    type="password"
-                                    required
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    placeholder="Password"
-                                    className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
-                                />
-                            </div>
+                        )}
 
-                            <div className="flex justify-end">
-                                <a href="#" className="text-xs font-bold text-secondary hover:underline">Forgot credentials?</a>
-                            </div>
+                        {!showReset ? (
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div className="relative">
+                                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        required
+                                        value={form.email}
+                                        onChange={handleChange}
+                                        placeholder="Hospital Email Address"
+                                        className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                    <input
+                                        name="password"
+                                        type="password"
+                                        required
+                                        value={form.password}
+                                        onChange={handleChange}
+                                        placeholder="Password"
+                                        className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
+                                    />
+                                </div>
 
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full h-14 text-lg bg-secondary shadow-xl shadow-secondary/25"
-                            >
-                                {loading ? 'Authenticating...' : 'Access Command Center'}
-                            </Button>
-                        </form>
+                                <div className="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowReset(true)}
+                                        className="text-xs font-bold text-secondary hover:underline"
+                                    >
+                                        Forgot credentials?
+                                    </button>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full h-14 text-lg bg-secondary shadow-xl shadow-secondary/25"
+                                >
+                                    {loading ? 'Authenticating...' : 'Access Command Center'}
+                                </Button>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleResetSubmit} className="space-y-5">
+                                <div className="p-4 bg-slate-50 rounded-2xl mb-4">
+                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                                        Enter your registered hospital email address and we'll send you a link to reset your administrative password.
+                                    </p>
+                                </div>
+                                <div className="relative">
+                                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                                    <input
+                                        type="email"
+                                        required
+                                        value={resetEmail}
+                                        onChange={(e) => setResetEmail(e.target.value)}
+                                        placeholder="Hospital Email Address"
+                                        className="block w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-secondary/20 transition-all font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium outline-none"
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full h-14 text-lg bg-secondary shadow-xl shadow-secondary/25"
+                                >
+                                    {loading ? 'Sending link...' : 'Send Reset Link'}
+                                </Button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setShowReset(false)}
+                                    className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors py-2"
+                                >
+                                    Back to Login
+                                </button>
+                            </form>
+                        )}
 
                         <div className="mt-8 pt-8 border-t border-slate-50 text-center">
                             <p className="text-slate-400 text-sm font-medium">New hospital onboarding?</p>

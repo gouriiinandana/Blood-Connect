@@ -80,6 +80,14 @@ export const HospitalAuthProvider = ({ children }) => {
         return authData;
     };
 
+    // ── Reset Password ───────────────────────────────────────
+    const resetPassword = async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/hospital/login`,
+        });
+        if (error) throw error;
+    };
+
     // ── Login ─────────────────────────────────────────────────
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -112,6 +120,7 @@ export const HospitalAuthProvider = ({ children }) => {
         isAuthenticated: !!session && !!hospital,
         register,
         login,
+        resetPassword,
         logout,
         updateInventory,
     };

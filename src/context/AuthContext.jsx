@@ -74,6 +74,14 @@ export const AuthProvider = ({ children }) => {
         return { error };
     };
 
+    // ── Reset Password ────────────────────────────────────────
+    const resetPassword = async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/login`,
+        });
+        if (error) throw error;
+    };
+
     // ── Register donor ────────────────────────────────────────
     const register = async (formData) => {
         const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -123,6 +131,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!session && !!donor,
         register,
         login,
+        resetPassword,
         logout,
         updateUser: updateProfile, // Alias for compatibility
     };
