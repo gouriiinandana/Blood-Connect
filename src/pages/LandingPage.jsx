@@ -8,6 +8,12 @@ import { INVENTORY_DATA } from '../data/mockData';
 
 const LandingPage = () => {
     const [matchIndex, setMatchIndex] = React.useState(0);
+    const [stats, setStats] = React.useState([
+        { label: 'Demand Forecasting', value: 98.4, color: 'bg-emerald-500', suffix: '%' },
+        { label: 'Donor Matching Speed', value: 2.4, color: 'bg-secondary', suffix: ' min' },
+        { label: 'Inventory Level', value: 82, color: 'bg-primary', suffix: '', labelOverride: 'Critical' },
+    ]);
+
     const matches = [
         { type: 'O- Negative', status: 'Found' },
         { type: 'A+ Positive', status: 'Matched' },
@@ -16,10 +22,32 @@ const LandingPage = () => {
     ];
 
     React.useEffect(() => {
-        const interval = setInterval(() => {
+        const matchInterval = setInterval(() => {
             setMatchIndex((prev) => (prev + 1) % matches.length);
         }, 3000);
-        return () => clearInterval(interval);
+
+        const statsInterval = setInterval(() => {
+            setStats(prev => prev.map(stat => {
+                if (stat.label === 'Demand Forecasting') {
+                    const newVal = Math.min(99.9, Math.max(97.0, stat.value + (Math.random() - 0.5) * 0.4));
+                    return { ...stat, value: Number(newVal.toFixed(1)) };
+                }
+                if (stat.label === 'Donor Matching Speed') {
+                    const newVal = Math.min(2.8, Math.max(1.8, stat.value + (Math.random() - 0.5) * 0.2));
+                    return { ...stat, value: Number(newVal.toFixed(1)) };
+                }
+                if (stat.label === 'Inventory Level') {
+                    const newVal = Math.min(88, Math.max(75, stat.value + (Math.random() - 0.5) * 1.0));
+                    return { ...stat, value: Number(newVal.toFixed(1)) };
+                }
+                return stat;
+            }));
+        }, 2000);
+
+        return () => {
+            clearInterval(matchInterval);
+            clearInterval(statsInterval);
+        };
     }, []);
 
     return (
@@ -67,18 +95,19 @@ const LandingPage = () => {
                                 <span className="flex h-3 w-3 rounded-full bg-emerald-500 animate-ping"></span>
                             </div>
                             <div className="space-y-6">
-                                {[
-                                    { label: 'Demand Forecasting', value: '98.4%', color: 'bg-emerald-500' },
-                                    { label: 'Donor Matching Speed', value: '2.4 min', color: 'bg-secondary' },
-                                    { label: 'Inventory Level', value: 'Critical', color: 'bg-primary' },
-                                ].map((stat, i) => (
+                                {stats.map((stat, i) => (
                                     <div key={i} className="space-y-3">
                                         <div className="flex justify-between text-xs font-bold uppercase tracking-widest px-1">
                                             <span className="text-slate-400">{stat.label}</span>
-                                            <span className="text-slate-900">{stat.value}</span>
+                                            <span className="text-slate-900">
+                                                {stat.labelOverride || (stat.value + stat.suffix)}
+                                            </span>
                                         </div>
                                         <div className="h-3 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                                            <div className={`h-full ${stat.color} transition-all duration-1000`} style={{ width: '80%' }}></div>
+                                            <div
+                                                className={`h-full ${stat.color} transition-all duration-1000`}
+                                                style={{ width: `${stat.label === 'Donor Matching Speed' ? (stat.value / 4 * 100) : stat.value}%` }}
+                                            ></div>
                                         </div>
                                     </div>
                                 ))}
