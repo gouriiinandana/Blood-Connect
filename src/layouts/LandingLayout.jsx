@@ -16,7 +16,7 @@ const LandingLayout = () => {
             <nav className="h-20 border-b border-slate-50 px-6 sm:px-12 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-40">
                 <Link to="/" className="flex items-center">
                     <HeartHandLogo size={48} />
-                    <span className="font-bold text-2xl tracking-tight text-slate-800 ml-2">Blood Connect</span>
+                    <span className="font-bold text-2xl tracking-tight text-slate-800 ml-4">Blood Connect</span>
                 </Link>
 
                 <div className="hidden md:flex items-center space-x-8">
@@ -47,7 +47,7 @@ const LandingLayout = () => {
                     <div className="col-span-1 md:col-span-1">
                         <div className="flex items-center mb-6">
                             <HeartHandLogo size={36} />
-                            <span className="font-bold text-xl tracking-tight -ml-1">Blood Connect</span>
+                            <span className="font-bold text-xl tracking-tight ml-3">Blood Connect</span>
                         </div>
                         <p className="text-slate-400 text-sm leading-relaxed">
                             Empowering healthcare systems with real-time blood coordination and life-saving AI matching.
@@ -66,7 +66,6 @@ const LandingLayout = () => {
                         <h4 className="font-bold mb-6">Resources</h4>
                         <ul className="space-y-4 text-slate-400 text-sm">
                             <li><Link to="/donation-guide" className="hover:text-white transition-colors">Donation Guide</Link></li>
-                            <li><a href="#" className="hover:text-white transition-colors">API Documentation</a></li>
                             <li><Link to="/safety-protocols" className="hover:text-white transition-colors">Safety Protocols</Link></li>
                             <li><Link to="/health-data-protection" className="hover:text-white transition-colors">Health Data Protection</Link></li>
                         </ul>

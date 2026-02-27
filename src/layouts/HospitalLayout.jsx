@@ -40,7 +40,7 @@ const HospitalLayout = () => {
             <aside className={`bg-white border-r border-slate-100 transition-all duration-300 z-30 flex flex-col ${sidebarOpen ? 'w-64' : 'w-20'}`}>
                 <div className="h-20 flex items-center px-4 border-b border-slate-50 shrink-0">
                     <HeartHandLogo size={44} />
-                    {sidebarOpen && <span className="font-bold text-xl tracking-tight text-slate-800 ml-2">Blood Connect</span>}
+                    {sidebarOpen && <span className="font-bold text-xl tracking-tight text-slate-800 ml-4">Blood Connect</span>}
                 </div>
 
                 <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto">

@@ -29,7 +29,7 @@ const DonorLayout = () => {
             <header className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
                 <div className="flex items-center">
                     <HeartHandLogo size={42} />
-                    <span className="font-bold text-xl tracking-tight text-slate-800 ml-2">Blood Connect</span>
+                    <span className="font-bold text-xl tracking-tight text-slate-800 ml-4">Blood Connect</span>
                 </div>
                 <div className="flex items-center space-x-3">
                     <button className="p-2 text-slate-500 relative hover:bg-slate-50 rounded-xl transition-all">
